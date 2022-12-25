@@ -7,7 +7,7 @@ function encryption {
   if openssl rand 192 > sessionKey 2>/dev/null ; then
     echo "Session Key Generated."
   else  
-    >&2 echo "ERROR bhardwaj.p - unable to generate session key."
+    >&2 echo "ERROR - unable to generate session key."
     exit 1
   fi
 
@@ -15,7 +15,7 @@ function encryption {
   if openssl enc -in ${6} -out message.enc -e -aes-256-cbc -pbkdf2 -k sessionKey 2>/dev/null ; then
     echo "Message file encrypted with session key."
   else
-    >&2 echo "ERROR bhardwaj.p - unable to encrypt the file." 
+    >&2 echo "ERROR - unable to encrypt the file." 
     exit 1   
   fi
 
@@ -23,7 +23,7 @@ function encryption {
   if openssl pkeyutl -encrypt -pubin -inkey ${2} -in sessionKey -out "sessionKey_1.enc" 2>/dev/null ; then
     echo "Session Key encrypted with ${2}"
   else 
-    >&2 echo "ERROR bhardwaj.p - unable to encrypt session key with ${2}. Aborting the program."
+    >&2 echo "ERROR - unable to encrypt session key with ${2}. Aborting the program."
     exit 1
   fi      
 
@@ -31,7 +31,7 @@ function encryption {
   if openssl pkeyutl -encrypt -pubin -inkey ${3} -in sessionKey -out "sessionKey_2.enc" 2>/dev/null ; then
     echo "Session Key encrypted with ${3}"
   else 
-    >&2 echo "ERROR bhardwaj.p - unable to encrypt session key with ${3}. Aborting the program."
+    >&2 echo "ERROR - unable to encrypt session key with ${3}. Aborting the program."
     exit 1
   fi  
 
@@ -39,7 +39,7 @@ function encryption {
   if openssl pkeyutl -encrypt -pubin -inkey ${4} -in sessionKey -out "sessionKey_3.enc" 2>/dev/null ; then
       echo "Session Key encrypted with ${4}"
   else 
-    >&2 echo "ERROR bhardwaj.p - unable to encrypt session key with ${4}. Aborting the program."
+    >&2 echo "ERROR - unable to encrypt session key with ${4}. Aborting the program."
     exit 1
   fi  
 
@@ -47,7 +47,7 @@ function encryption {
   if openssl dgst -sha3-512 -sign ${5} -out message.signed message.enc 2>/dev/null ; then
     echo "Signed the encrypted message with ${5}"
   else
-    >&2 echo "ERROR bhardwaj.p - unable to sign the encrypted message with ${5}. Aborting the program."
+    >&2 echo "ERROR - unable to sign the encrypted message with ${5}. Aborting the program."
   fi
 
 
@@ -57,10 +57,10 @@ function encryption {
     if rm message.enc message.signed sessionKey_1.enc sessionKey_2.enc sessionKey_3.enc sessionKey 2>/dev/null ; then
       echo "Clean up complete!"
     else
-      >&2 echo "ERROR bhardwaj.p - unexpected error occurred while removing temporary files."
+      >&2 echo "ERROR - unexpected error occurred while removing temporary files."
     fi  
   else 
-      >&2 echo "ERROR bhardwaj.p - unable to create a package."
+      >&2 echo "ERROR - unable to create a package."
   fi
     
 }
@@ -71,14 +71,14 @@ function decryption {
   if unzip ${4} 1>/dev/null ; then
     echo "unzipping the file."
   else
-    >&2 echo "ERROR bhardwaj.p - error occurred while un-packing the package."
+    >&2 echo "ERROR - error occurred while un-packing the package."
   fi    
 
   # verify encrypted message signature with signed message.
   if openssl dgst -sha3-512 -verify ${3} -signature message.signed message.enc 1>/dev/null 2>/dev/null ; then
     echo "Verification complete. Decrypting message."
   else
-    >&2 echo "ERROR bhardwaj.p - Verification failed. Aborting the program."
+    >&2 echo "ERROR - Verification failed. Aborting the program."
   fi
 
   # Nested if-else to decrypt session key.
@@ -91,7 +91,7 @@ function decryption {
       if openssl pkeyutl -decrypt -inkey ${2} -in sessionKey_3.enc -out sessionKey 2>/dev/null ; then
         echo "Session Key decrypted."
       else
-        >&2 echo "ERROR bhardwaj.p - session key could not be decrypted. Please check if correct private key was provided."
+        >&2 echo "ERROR - session key could not be decrypted. Please check if correct private key was provided."
         exit 1
       fi
     fi  
@@ -101,7 +101,7 @@ function decryption {
   if openssl enc -in message.enc -out ${5} -d -aes-256-cbc -pbkdf2 -k sessionKey 2>/dev/null ; then
     echo "Message decrypted successfully!"
   else
-    >&2 echo "ERROR bhardwaj.p - unable to decrypt message. Aborting the program."
+    >&2 echo "ERROR - unable to decrypt message. Aborting the program."
     exit 1
   fi
 
@@ -109,7 +109,7 @@ function decryption {
   if rm session* message.enc message.signed 2>/dev/null ; then
     echo "Clean up complete!"
   else
-    >&2 echo "ERROR bhardwaj.p - couldn't complete the clean-up process."
+    >&2 echo "ERROR - couldn't complete the clean-up process."
   fi     
 }
 
@@ -121,7 +121,7 @@ case "${1}" in
       if [ "$#" -eq "7" ] ; then
         encryption ${@}
       else
-        >&2 echo "ERROR bhardwaj.p - check if all aeguements are provided. Refer ./crypto.sh -e receiver1.pub receiver2.pub receiver3.pub sender.priv <plaintext_file> <encrypted_file>"
+        >&2 echo "ERROR - check if all aeguements are provided. Refer ./crypto.sh -e receiver1.pub receiver2.pub receiver3.pub sender.priv <plaintext_file> <encrypted_file>"
         exit 1
       fi    
       ;;
@@ -130,12 +130,12 @@ case "${1}" in
       if [ "$#" -eq "5" ] ; then
         decryption ${@}
       else
-        >&2 echo "ERROR bhardwaj.p - check if all aeguements are provided. Refer ./crypto.sh -d recierver<#>.priv sender.pub <encrypted_file> <decrypted_file>"
+        >&2 echo "ERROR - check if all aeguements are provided. Refer ./crypto.sh -d recierver<#>.priv sender.pub <encrypted_file> <decrypted_file>"
         exit 1
       fi
       ;;
     *)
-      >&2 echo "ERROR bhardwaj.p - unsupported mode. Please use '-e' for encryption and '-d' for decryption."
+      >&2 echo "ERROR - unsupported mode. Please use '-e' for encryption and '-d' for decryption."
       exit 1
       ;;
 esac
