@@ -9,7 +9,7 @@ OpenSSL version 3 should be installed.
 
 ### How to use:
 
-**To encrypt:***
+**To encrypt:**
 ./crypto.sh -e <receiver1_public_key.pub> <receiver2_public_key.pub> <receiver3_public_key.pub> <sender_private_key.priv> <plaintext_file> <encrypted_filename>
 
 **To decrypt:**
